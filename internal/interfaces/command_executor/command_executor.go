@@ -31,23 +31,15 @@ func (e *executor) Run(command string, ctx context.Context) (string, error) {
 }
 
 func ParseSlackOutput(out string) slack.Message {
-	fields := make([]*slack.TextBlockObject, 0)
 	blocks := []slack.Block{}
-
-	for index, line := range strings.Split(out, "\n") {
+	for _, line := range strings.Split(out, "\n") {
 		if line == "" {
 			continue
 		}
-		fields = append(fields, slack.NewTextBlockObject("mrkdwn", line, false, false))
-		if index%9 == 0 { // For every 10 line wrap into 1 section
-			fieldsSection := slack.NewSectionBlock(nil, fields, nil)
-			blocks = append(blocks, fieldsSection)
-			fields = make([]*slack.TextBlockObject, 0)
-		}
+		field := slack.NewTextBlockObject("mrkdwn", line, false, false)
+		fieldsSection := slack.NewSectionBlock(field, nil, nil)
+		blocks = append(blocks, fieldsSection)
 	}
-	fieldsSection := slack.NewSectionBlock(nil, fields, nil)
-	blocks = append(blocks, fieldsSection)
-
 	return slack.NewBlockMessage(blocks...)
 }
 
